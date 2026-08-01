@@ -17,6 +17,7 @@ The core driver implementation and the software verification environment are com
 
 ## 📁 Project Structure
 
+```text
 sht40-embedded-driver
 ├── src
 │   ├── sht40.h       # Driver interface (HAL & API definitions)
@@ -24,6 +25,7 @@ sht40-embedded-driver
 ├── tests
 │   └── main.c        # Software mock test suite
 └── README.md
+```
 
 ## 🧩 Hardware Abstraction Layer (HAL)
 
@@ -43,41 +45,25 @@ classDef test fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#000;
 classDef core fill:#efebe9,stroke:#5d4037,stroke-width:2px,color:#000;
 classDef struct fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000;
 
+%% Komponenten
+M_Main["main.c Test Runner<br/>(Test Environment)"]
+M_Mock["mock_i2c_write / mock_i2c_read<br/>(Hardware Simulation)"]
+M_Init["sht40_init()<br/>(Driver Initialization)"]
+D_Struct["sht40_t Struct<br/>(HAL Function Pointers)"]
+D_Read["sht40_read_measurement()<br/>(Measurement Process)"]
+D_CRC["calculate_crc8()<br/>(Integrity Check)"]
+D_Convert["Temperature & Humidity Conversion<br/>(Sensirion Formulas)"]
 
-%% Test Environment
-subgraph Test_Environment ["tests/main.c - PC Software Mock Environment"]
+%% Verbindungen (Logischer Fluss ohne Kreuzungen)
+M_Main -->|Controls scenarios| M_Mock
+M_Main -->|Calls| M_Init
+M_Init -->|Initializes| D_Struct
+M_Mock -.->|Injected into| D_Struct
+D_Struct -->|Provides HAL to| D_Read
+D_Read -->|Verifies data| D_CRC
+D_Read -->|Calculates| D_Convert
 
-    M_Main["main.c Test Runner"]
-
-    M_Mock["mock_i2c_write<br/>mock_i2c_read<br/>mock_delay_ms"]
-
-    M_Main -->|Injects HAL callbacks| M_Init["sht40_init"]
-    M_Main -->|Controls test scenarios| M_Mock
-
-end
-
-
-%% Driver Core
-subgraph Driver_Core ["src/sht40.c & src/sht40.h - Hardware Independent Driver"]
-
-    M_Init -->|Stores configuration and function pointers| D_Struct["sht40_t Struct"]
-
-    D_Read["sht40_read_measurement"]
-
-    D_Struct -->|Provides HAL interface| D_Read
-
-    D_Read -->|Checks data integrity| D_CRC["calculate_crc8"]
-
-    D_Read -->|Applies Sensirion conversion formulas| D_Convert["Temperature and Humidity Conversion"]
-
-end
-
-
-%% HAL connection
-M_Mock -.->|Called through stored function pointers| D_Struct
-
-
-%% Classes
+%% Zuweisung der Farben
 class M_Main,M_Mock test;
 class M_Init,D_Read,D_CRC,D_Convert core;
 class D_Struct struct;
@@ -89,8 +75,10 @@ The project includes a standalone test suite in tests/main.c that simulates a vi
 
 To compile and run the tests on your local PC using any standard C compiler (e.g., GCC):
 
+```bash
 gcc src/sht40.c tests/main.c -o sht40_test
 ./sht40_test
+```
 
 ### 📊 Expected Test Output
 
