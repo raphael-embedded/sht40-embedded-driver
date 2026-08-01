@@ -39,7 +39,7 @@ sht40_error_t sht40_init(sht40_t *dev, uint8_t i2c_addr, sht40_i2c_write_fn writ
 }
 
 sht40_error_t sht40_read_measurement(sht40_t *dev, sht40_precision_t precision) {
-    if (dev == NULL) {
+    if (dev == NULL || dev->i2c_write == NULL || dev->i2c_read == NULL || dev->delay_ms == NULL) {
         return SHT40_ERR_NULL_PTR;
     }
 
